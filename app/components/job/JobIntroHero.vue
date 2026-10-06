@@ -2,7 +2,7 @@
 type Enter = 'rise' | 'left' | 'right' | 'top' | 'pop' | 'stamp'
 
 /** Collage piece kept in the hero. x in % of width; y, w and drop in cqw (`'ground'` = bottom edge tucked under the card); `at` in seconds. */
-interface Piece { id: string; src: string; x: number; y: number | 'ground'; w: number; r?: number; enter: Enter; at: number; drop?: number; sway?: number }
+interface Piece { id: string; src: string; x: number; y: number | 'ground'; w: number; r?: number; enter: Enter; at: number; drop?: number; sway?: boolean; burst?: boolean }
 
 /** Intro-only element sweeping across the screen; [x, y, rotate] offsets in cqw/deg relative to (x, y). */
 interface Flyer { id: string; src: string; x: number; y: number; w: number; at: number; duration: number; from: [number, number, number]; to: [number, number, number] }
@@ -15,8 +15,6 @@ const TITLE_STEP = 0.25
 const PILL_AT = 2.5
 const CARD_AT = 2.3
 const INTRO_END = 3.4
-const PLATE_STEP = 1.6
-const PLATE_ITEMS = ['/images/sticker-bell.png', '/images/collage-michelin.png', '/images/sticker-key.png', '/images/sticker-boarding-pass.png']
 
 /** Array order = stacking order. `drop` = how much lower the piece sits until the card pushes the scene up. */
 const PIECES: readonly Piece[] = [
@@ -24,13 +22,13 @@ const PIECES: readonly Piece[] = [
   { id: 'palm-back', src: '/images/collage-palm.png', x: 52, y: 116, w: 24, enter: 'rise', at: 0.75, drop: 35 },
   { id: 'palm-large', src: '/images/collage-palm.png', x: 20, y: 106, w: 36, enter: 'rise', at: 0.5, drop: 30 },
   { id: 'palm-small', src: '/images/collage-palm.png', x: 3, y: 122, w: 26, enter: 'rise', at: 0.65, drop: 35 },
-  { id: 'fork', src: '/images/sticker-fork.png', x: 13, y: 72, w: 26, r: 25, enter: 'left', at: 1.25, sway: 8 },
-  { id: 'stamp', src: '/images/sticker-stamp.png', x: 28, y: 87, w: 16, r: -8, enter: 'stamp', at: 1.5 },
-  { id: 'michelin', src: '/images/collage-michelin.png', x: 45, y: 98, w: 5, enter: 'pop', at: 1.8, sway: 14 },
+  { id: 'fork', src: '/images/sticker-fork.png', x: 13, y: 72, w: 26, r: 25, enter: 'left', at: 1.25 },
+  { id: 'stamp', src: '/images/sticker-stamp.png', x: 28, y: 87, w: 16, r: -8, enter: 'stamp', at: 1.5, burst: true },
+  { id: 'michelin', src: '/images/collage-michelin.png', x: 45, y: 98, w: 5, enter: 'pop', at: 1.8, sway: true },
   { id: 'key', src: '/images/sticker-key.png', x: 99, y: 62, w: 22, r: -25, enter: 'top', at: 1.3 },
-  { id: 'boarding-pass', src: '/images/sticker-boarding-pass.png', x: 98, y: 34, w: 14, r: 60, enter: 'right', at: 2 },
+  { id: 'boarding-pass', src: '/images/sticker-boarding-pass.png', x: 98, y: 34, w: 14, r: 60, enter: 'right', at: 2, burst: true },
   { id: 'bell', src: '/images/sticker-bell.png', x: 100, y: 90, w: 18, r: -10, enter: 'right', at: 2.1 },
-  { id: 'oui-chef', src: '/images/sticker-oui-chef.png', x: 14, y: 108, w: 28, r: 14, enter: 'left', at: 1.55, drop: 20 },
+  { id: 'oui-chef', src: '/images/sticker-oui-chef.png', x: 14, y: 108, w: 28, r: 14, enter: 'left', at: 1.55, drop: 20, burst: true },
   { id: 'plane-window', src: '/images/collage-plane-window.png', x: 57, y: 'ground', w: 23, enter: 'rise', at: 1.25, drop: 40 },
   { id: 'hand-plate', src: '/images/collage-hand-plate.png', x: 75, y: 100, w: 30, enter: 'right', at: 2.6 },
   { id: 'tanya', src: '/images/collage-tanya.png', x: 94, y: 'ground', w: 36, enter: 'rise', at: 1.55, drop: 40 },
@@ -47,13 +45,36 @@ const FLYERS: readonly Flyer[] = [
   { id: 'stamp-corner', src: '/images/sticker-stamp.png', x: 88, y: 24, w: 14, at: 1, duration: 1.3, from: [25, -10, 15], to: [-20, 15, -5] }
 ]
 
+// Cycled one at a time above the silver plate; keep in sync with the plate-pop keyframes (1 / length window).
+const PLATE_ITEMS = [
+  { src: '/images/sticker-bell.png', w: 11 },
+  { src: '/images/collage-michelin.png', w: 5 },
+  { src: '/images/sticker-key.png', w: 9 },
+  { src: '/images/sticker-boarding-pass.png', w: 7 }
+] as const
+const PLATE_STEP = 1.6
+const BURST_COPIES = 7
+const BURST_STEP = 0.07
+
+// Deterministic scatter (SSR-safe): copies spread around the piece like a burst-shot stack.
+const burstCopy = (piece: Piece, i: number) => {
+  const angle = (i / BURST_COPIES) * 2 * Math.PI + (i % 2 ? 0.4 : -0.2)
+  const dist = piece.w * (0.35 + (i % 3) * 0.12)
+  return {
+    '--bx': `${Math.cos(angle) * dist}cqw`,
+    '--by': `${Math.sin(angle) * dist}cqw`,
+    rotate: `${(piece.r ?? 0) + (i % 2 ? 1 : -1) * (8 + i * 3)}deg`,
+    animationDelay: `${piece.at + i * BURST_STEP}s`
+  }
+}
+
 const titleLines = (title: string): string[] => title.split(/\s*[,&]\s*/).filter(Boolean)
 
-// The card overlaps the header by 2rem; only a sliver of the cut-off edge is tucked under it.
+// The card overlaps the header by 2rem, so bottom: 0 hides the cut-off edge behind it.
 const box = (x: number, y: number | 'ground', w: number) => ({
   left: `${x}%`,
   width: `${w}cqw`,
-  ...(y === 'ground' ? { bottom: 'calc(2rem - 2cqw)' } : { top: `${y}cqw` })
+  ...(y === 'ground' ? { bottom: 0 } : { top: `${y}cqw` })
 })
 
 const flyerStyle = (f: Flyer) => ({
@@ -121,31 +142,45 @@ watch([showTitle, isHeaderVisible], async ([faded, visible]) => {
           aria-hidden="true"
         >
           <div
+            class="relative"
             :class="{ 'intro-settle': piece.drop, 'sway': piece.sway }"
-            :style="{ '--drop': `${piece.drop ?? 0}cqw`, '--sway': `${piece.sway ?? 0}deg`, '--sway-at': `${piece.at + 0.5}s` }"
+            :style="{ '--drop': `${piece.drop ?? 0}cqw`, '--sway-at': `${piece.at + 0.5}s` }"
           >
+            <template v-if="piece.burst">
+              <img
+                v-for="i in BURST_COPIES"
+                :key="i"
+                :src="piece.src"
+                alt=""
+                draggable="false"
+                class="burst-copy"
+                :style="burstCopy(piece, i - 1)"
+              >
+            </template>
             <img
               :src="piece.src"
               alt=""
               draggable="false"
-              class="intro-anim w-full"
+              class="intro-anim relative w-full"
               :class="`enter-${piece.enter}`"
               :style="{ rotate: `${piece.r ?? 0}deg`, animationDelay: `${piece.at}s` }"
             >
+            <div v-if="piece.id === 'hand-plate'" class="plate">
+              <img
+                v-for="(item, index) in PLATE_ITEMS"
+                :key="item.src"
+                :src="item.src"
+                alt=""
+                draggable="false"
+                class="plate-item"
+                :style="{
+                  width: `${item.w}cqw`,
+                  animationDuration: `${PLATE_STEP * PLATE_ITEMS.length}s`,
+                  animationDelay: `${INTRO_END + index * PLATE_STEP}s`
+                }"
+              >
+            </div>
           </div>
-        </div>
-
-        <!-- Bottom edge sits on the silver plate of `hand-plate`, so items emerge from it. -->
-        <div class="pointer-events-none absolute top-[66cqw] left-[75%] h-[20cqw] w-[18cqw] -translate-x-1/2 overflow-hidden" aria-hidden="true">
-          <img
-            v-for="(src, index) in PLATE_ITEMS"
-            :key="src"
-            :src="src"
-            alt=""
-            draggable="false"
-            class="plate-item absolute bottom-0 left-1/2 w-[11cqw] -translate-x-1/2"
-            :style="{ animationDelay: `${INTRO_END + index * PLATE_STEP}s`, animationDuration: `${PLATE_ITEMS.length * PLATE_STEP}s` }"
-          >
         </div>
 
         <img
@@ -263,9 +298,35 @@ watch([showTitle, isHeaderVisible], async ([faded, visible]) => {
   animation: sway 2.4s ease-in-out var(--sway-at) infinite alternate;
 }
 
-.plate-item {
+.burst-copy {
+  position: absolute;
+  inset: 0;
+  width: 100%;
   opacity: 0;
-  animation: plate-item ease-in-out infinite backwards;
+  animation: burst 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Bottom edge sits on the plate surface; only that edge clips so items emerge from the plate. */
+.plate {
+  position: absolute;
+  left: 50%;
+  top: 9%;
+  width: 60%;
+  aspect-ratio: 1;
+  translate: -50% -100%;
+  clip-path: inset(-100% -100% 0 -100%);
+}
+
+.plate-item {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  translate: -50% 0;
+  opacity: 0;
+  animation-name: plate-pop;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-fill-mode: backwards;
 }
 
 .intro-flyer {
@@ -319,15 +380,24 @@ watch([showTitle, isHeaderVisible], async ([faded, visible]) => {
   60% { opacity: 1; transform: scale(0.92); }
 }
 
-@keyframes sway {
-  from { rotate: calc(var(--sway) * -1); }
-  to { rotate: var(--sway); }
+@keyframes burst {
+  from { opacity: 0; transform: translate(var(--bx), var(--by)) scale(1.5); }
+  12% { opacity: 1; transform: translate(var(--bx), var(--by)) scale(1); }
+  60% { opacity: 1; transform: translate(var(--bx), var(--by)) scale(1); }
+  to { opacity: 0; transform: translate(0, 0) scale(0.6); }
 }
 
-@keyframes plate-item {
+/* Each item owns a 25% window (4 items). */
+@keyframes plate-pop {
   0% { opacity: 0; transform: translateY(100%); }
-  10%, 22% { opacity: 1; transform: translateY(0); }
-  30%, 100% { opacity: 0; transform: translateY(-15%); }
+  6% { opacity: 1; transform: translateY(-10%); }
+  18% { opacity: 1; transform: translateY(-18%); }
+  25%, 100% { opacity: 0; transform: translateY(-35%); }
+}
+
+@keyframes sway {
+  from { rotate: -14deg; }
+  to { rotate: 14deg; }
 }
 
 @keyframes fly {
@@ -340,12 +410,10 @@ watch([showTitle, isHeaderVisible], async ([faded, visible]) => {
   .intro-anim,
   .intro-card,
   .intro-settle,
-  .sway {
-    animation: none;
-  }
-
+  .sway,
+  .burst-copy,
   .plate-item {
-    display: none;
+    animation: none;
   }
 }
 </style>
