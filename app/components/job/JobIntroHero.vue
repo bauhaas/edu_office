@@ -1,8 +1,8 @@
 <script setup lang="ts">
 type Enter = 'rise' | 'left' | 'right' | 'top' | 'pop' | 'stamp'
 
-/** Collage piece kept in the hero. x in % of width; y, w and drop in cqw; `at` in seconds. */
-interface Piece { id: string; src: string; x: number; y: number; w: number; r?: number; enter: Enter; at: number; drop?: number }
+/** Collage piece kept in the hero. x in % of width; y, w and drop in cqw (`'ground'` = bottom edge tucked under the card); `at` in seconds. */
+interface Piece { id: string; src: string; x: number; y: number | 'ground'; w: number; r?: number; enter: Enter; at: number; drop?: number; sway?: number }
 
 /** Intro-only element sweeping across the screen; [x, y, rotate] offsets in cqw/deg relative to (x, y). */
 interface Flyer { id: string; src: string; x: number; y: number; w: number; at: number; duration: number; from: [number, number, number]; to: [number, number, number] }
@@ -15,6 +15,8 @@ const TITLE_STEP = 0.25
 const PILL_AT = 2.5
 const CARD_AT = 2.3
 const INTRO_END = 3.4
+const PLATE_STEP = 1.6
+const PLATE_ITEMS = ['/images/sticker-bell.png', '/images/collage-michelin.png', '/images/sticker-key.png', '/images/sticker-boarding-pass.png']
 
 /** Array order = stacking order. `drop` = how much lower the piece sits until the card pushes the scene up. */
 const PIECES: readonly Piece[] = [
@@ -22,17 +24,17 @@ const PIECES: readonly Piece[] = [
   { id: 'palm-back', src: '/images/collage-palm.png', x: 52, y: 116, w: 24, enter: 'rise', at: 0.75, drop: 35 },
   { id: 'palm-large', src: '/images/collage-palm.png', x: 20, y: 106, w: 36, enter: 'rise', at: 0.5, drop: 30 },
   { id: 'palm-small', src: '/images/collage-palm.png', x: 3, y: 122, w: 26, enter: 'rise', at: 0.65, drop: 35 },
-  { id: 'fork', src: '/images/sticker-fork.png', x: 13, y: 72, w: 26, r: 25, enter: 'left', at: 1.25 },
+  { id: 'fork', src: '/images/sticker-fork.png', x: 13, y: 72, w: 26, r: 25, enter: 'left', at: 1.25, sway: 8 },
   { id: 'stamp', src: '/images/sticker-stamp.png', x: 28, y: 87, w: 16, r: -8, enter: 'stamp', at: 1.5 },
-  { id: 'michelin', src: '/images/collage-michelin.png', x: 45, y: 98, w: 5, enter: 'pop', at: 1.8 },
+  { id: 'michelin', src: '/images/collage-michelin.png', x: 45, y: 98, w: 5, enter: 'pop', at: 1.8, sway: 14 },
   { id: 'key', src: '/images/sticker-key.png', x: 99, y: 62, w: 22, r: -25, enter: 'top', at: 1.3 },
   { id: 'boarding-pass', src: '/images/sticker-boarding-pass.png', x: 98, y: 34, w: 14, r: 60, enter: 'right', at: 2 },
   { id: 'bell', src: '/images/sticker-bell.png', x: 100, y: 90, w: 18, r: -10, enter: 'right', at: 2.1 },
   { id: 'oui-chef', src: '/images/sticker-oui-chef.png', x: 14, y: 108, w: 28, r: 14, enter: 'left', at: 1.55, drop: 20 },
-  { id: 'plane-window', src: '/images/collage-plane-window.png', x: 57, y: 128, w: 23, enter: 'rise', at: 1.25, drop: 40 },
+  { id: 'plane-window', src: '/images/collage-plane-window.png', x: 57, y: 'ground', w: 23, enter: 'rise', at: 1.25, drop: 40 },
   { id: 'hand-plate', src: '/images/collage-hand-plate.png', x: 75, y: 100, w: 30, enter: 'right', at: 2.6 },
-  { id: 'tanya', src: '/images/collage-tanya.png', x: 94, y: 126, w: 36, enter: 'rise', at: 1.55, drop: 40 },
-  { id: 'chef', src: '/images/collage-chef-glasses.png', x: 36, y: 132, w: 30, enter: 'rise', at: 2.5 },
+  { id: 'tanya', src: '/images/collage-tanya.png', x: 94, y: 'ground', w: 36, enter: 'rise', at: 1.55, drop: 40 },
+  { id: 'chef', src: '/images/collage-chef-glasses.png', x: 36, y: 'ground', w: 30, enter: 'rise', at: 2.5 },
   { id: 'ratatouille', src: '/images/collage-ratatouille.png', x: 71, y: 130, w: 20, enter: 'pop', at: 2.8 }
 ]
 
@@ -47,7 +49,12 @@ const FLYERS: readonly Flyer[] = [
 
 const titleLines = (title: string): string[] => title.split(/\s*[,&]\s*/).filter(Boolean)
 
-const box = (x: number, y: number, w: number) => ({ left: `${x}%`, top: `${y}cqw`, width: `${w}cqw` })
+// The card overlaps the header by 2rem; only a sliver of the cut-off edge is tucked under it.
+const box = (x: number, y: number | 'ground', w: number) => ({
+  left: `${x}%`,
+  width: `${w}cqw`,
+  ...(y === 'ground' ? { bottom: 'calc(2rem - 2cqw)' } : { top: `${y}cqw` })
+})
 
 const flyerStyle = (f: Flyer) => ({
   ...box(f.x, f.y, f.w),
@@ -108,11 +115,15 @@ watch([showTitle, isHeaderVisible], async ([faded, visible]) => {
         <div
           v-for="piece in PIECES"
           :key="piece.id"
-          class="pointer-events-none absolute -translate-1/2"
+          class="pointer-events-none absolute"
+          :class="piece.y === 'ground' ? '-translate-x-1/2' : '-translate-1/2'"
           :style="box(piece.x, piece.y, piece.w)"
           aria-hidden="true"
         >
-          <div :class="{ 'intro-settle': piece.drop }" :style="{ '--drop': `${piece.drop ?? 0}cqw` }">
+          <div
+            :class="{ 'intro-settle': piece.drop, 'sway': piece.sway }"
+            :style="{ '--drop': `${piece.drop ?? 0}cqw`, '--sway': `${piece.sway ?? 0}deg`, '--sway-at': `${piece.at + 0.5}s` }"
+          >
             <img
               :src="piece.src"
               alt=""
@@ -122,6 +133,19 @@ watch([showTitle, isHeaderVisible], async ([faded, visible]) => {
               :style="{ rotate: `${piece.r ?? 0}deg`, animationDelay: `${piece.at}s` }"
             >
           </div>
+        </div>
+
+        <!-- Bottom edge sits on the silver plate of `hand-plate`, so items emerge from it. -->
+        <div class="pointer-events-none absolute top-[66cqw] left-[75%] h-[20cqw] w-[18cqw] -translate-x-1/2 overflow-hidden" aria-hidden="true">
+          <img
+            v-for="(src, index) in PLATE_ITEMS"
+            :key="src"
+            :src="src"
+            alt=""
+            draggable="false"
+            class="plate-item absolute bottom-0 left-1/2 w-[11cqw] -translate-x-1/2"
+            :style="{ animationDelay: `${INTRO_END + index * PLATE_STEP}s`, animationDuration: `${PLATE_ITEMS.length * PLATE_STEP}s` }"
+          >
         </div>
 
         <img
@@ -235,6 +259,15 @@ watch([showTitle, isHeaderVisible], async ([faded, visible]) => {
 .enter-pop { animation-name: enter-pop; animation-duration: 0.5s; animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
 .enter-stamp { animation-name: enter-stamp; animation-duration: 0.45s; }
 
+.sway {
+  animation: sway 2.4s ease-in-out var(--sway-at) infinite alternate;
+}
+
+.plate-item {
+  opacity: 0;
+  animation: plate-item ease-in-out infinite backwards;
+}
+
 .intro-flyer {
   opacity: 0;
   animation-name: fly;
@@ -286,6 +319,17 @@ watch([showTitle, isHeaderVisible], async ([faded, visible]) => {
   60% { opacity: 1; transform: scale(0.92); }
 }
 
+@keyframes sway {
+  from { rotate: calc(var(--sway) * -1); }
+  to { rotate: var(--sway); }
+}
+
+@keyframes plate-item {
+  0% { opacity: 0; transform: translateY(100%); }
+  10%, 22% { opacity: 1; transform: translateY(0); }
+  30%, 100% { opacity: 0; transform: translateY(-15%); }
+}
+
 @keyframes fly {
   0% { opacity: 0; transform: translate(var(--fx), var(--fy)) rotate(var(--fr)); }
   8%, 85% { opacity: 1; }
@@ -295,8 +339,13 @@ watch([showTitle, isHeaderVisible], async ([faded, visible]) => {
 @media (prefers-reduced-motion: reduce) {
   .intro-anim,
   .intro-card,
-  .intro-settle {
+  .intro-settle,
+  .sway {
     animation: none;
+  }
+
+  .plate-item {
+    display: none;
   }
 }
 </style>
