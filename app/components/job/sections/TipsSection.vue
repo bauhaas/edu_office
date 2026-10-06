@@ -47,7 +47,7 @@ const patchItem = (item: Tip, changes: Partial<Omit<Tip, 'id'>>): void => update
 
 <template>
   <div class="space-y-8">
-    <UiSectionTitle centered class="mx-auto max-w-[16ch] text-balance">
+    <UiSectionTitle v-if="isEditing || section.title" centered class="mx-auto max-w-[16ch] text-balance">
       <EditorEditableText :model-value="section.title" label="Titre" @update:model-value="patch({ title: $event })" />
     </UiSectionTitle>
 
@@ -62,10 +62,10 @@ const patchItem = (item: Tip, changes: Partial<Omit<Tip, 'id'>>): void => update
         />
         <Icon :name="tip.icon" class="mx-auto mb-1 block text-4xl" aria-hidden="true" />
         <p class="mb-3 text-xs text-ink-muted">
-          <EditorEditableText :model-value="tip.icon" label="Icône (ex. fluent-emoji:rocket)" @update:model-value="patchItem(tip, { icon: $event })" />
+          <EditorEditableText :model-value="tip.icon" label="Icône (ex. fluent-emoji:rocket)" required :maxlength="80" @update:model-value="patchItem(tip, { icon: $event })" />
         </p>
         <p class="text-[15px] leading-snug font-medium">
-          <EditorEditableText :model-value="tip.text" label="Conseil" multiline @update:model-value="patchItem(tip, { text: $event })" />
+          <EditorEditableText :model-value="tip.text" label="Conseil" multiline required @update:model-value="patchItem(tip, { text: $event })" />
         </p>
       </li>
       <li>
@@ -78,7 +78,7 @@ const patchItem = (item: Tip, changes: Partial<Omit<Tip, 'id'>>): void => update
       class="space-y-5"
       role="region"
       aria-roledescription="carrousel"
-      :aria-label="section.title"
+      :aria-label="section.title || 'Conseils'"
       tabindex="0"
       @keydown.left.prevent="previous"
       @keydown.right.prevent="next"

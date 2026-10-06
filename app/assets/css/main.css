@@ -63,6 +63,10 @@
     field-sizing: content;
   }
 
+  .editable-field.is-missing {
+    @apply bg-red-50 outline-red-500;
+  }
+
   .control-btn {
     @apply grid size-7 place-items-center rounded-full text-sm transition-colors hover:bg-white/20 disabled:opacity-30 disabled:hover:bg-transparent;
   }

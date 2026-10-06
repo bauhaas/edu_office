@@ -25,7 +25,7 @@ onBeforeUnmount(() => {
     class="fixed inset-0 z-[100] flex justify-center bg-ink/30 backdrop-blur-2xl"
     role="dialog"
     aria-modal="true"
-    :aria-label="secret.title"
+    :aria-label="secret.title || 'Secret'"
     @click.self="$emit('close')"
   >
     <div class="relative flex w-full max-w-[430px] flex-col items-center overflow-y-auto px-7 pt-28 pb-12 text-center text-white" @click.self="$emit('close')">
@@ -40,13 +40,13 @@ onBeforeUnmount(() => {
       </button>
 
       <div class="secret-image relative mb-10 w-[52%]">
-        <img :src="asset.src" :alt="asset.alt" class="w-full drop-shadow-2xl" draggable="false">
+        <img :src="asset.src" :alt="asset.alt" class="secret-asset w-full" draggable="false">
       </div>
 
       <h2 class="secret-text mb-6 text-[32px] leading-tight font-semibold">
-        <EditorEditableText :model-value="secret.title" label="Titre du secret" @update:model-value="patch({ title: $event })" />
+        <EditorEditableText :model-value="secret.title" label="Titre du secret" required @update:model-value="patch({ title: $event })" />
       </h2>
-      <p class="secret-text text-[15px] leading-relaxed text-white/95" style="animation-delay: 120ms">
+      <p v-if="isEditing || secret.body" class="secret-text text-[15px] leading-relaxed text-white/95" style="animation-delay: 120ms">
         <EditorEditableText :model-value="secret.body" label="Texte du secret" multiline @update:model-value="patch({ body: $event })" />
       </p>
 
@@ -75,6 +75,28 @@ onBeforeUnmount(() => {
 <style scoped>
 .secret-image {
   animation: pop-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  perspective: 800px;
+}
+
+/* Stacked drop-shadows trace the image's alpha, so transparent SVG/PNG get a contour, not a box. */
+.secret-asset {
+  filter:
+    drop-shadow(3px 0 0 white)
+    drop-shadow(-3px 0 0 white)
+    drop-shadow(0 3px 0 white)
+    drop-shadow(0 -3px 0 white)
+    drop-shadow(0 20px 25px rgb(0 0 0 / 0.25));
+  animation: spin-y 4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .secret-asset {
+    animation: none;
+  }
+}
+
+@keyframes spin-y {
+  to { transform: rotateY(360deg); }
 }
 
 .secret-text {

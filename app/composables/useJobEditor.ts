@@ -1,3 +1,4 @@
+import { jobPageSchema } from '#shared/schemas/job'
 import type { JobPage, JobPageMeta, JobSection } from '#shared/types/job'
 
 /** Draft-based editing: changes stay local until `save()` persists them through the repository. */
@@ -11,6 +12,10 @@ export async function useJobEditor(slug: string) {
   const error = ref<string | null>(null)
 
   const isDirty = computed(() => JSON.stringify(draft.value) !== JSON.stringify(page.value))
+  const validationErrors = computed<string[]>(() => {
+    const result = jobPageSchema.safeParse(draft.value)
+    return result.success ? [] : [...new Set(result.error.issues.map((issue) => issue.message))]
+  })
 
   function start(): void {
     error.value = null
@@ -24,11 +29,14 @@ export async function useJobEditor(slug: string) {
   }
 
   async function save(): Promise<void> {
+    if (validationErrors.value.length > 0) return
     isSaving.value = true
     error.value = null
     try {
       await repository.save(toRaw(draft.value))
       await refresh()
+      // The schema trims text, so resync or the draft would stay "dirty".
+      draft.value = structuredClone(toRaw(page.value))
       isEditing.value = false
     } catch (cause) {
       error.value = cause instanceof Error ? cause.message : 'Échec de l’enregistrement.'
@@ -54,6 +62,7 @@ export async function useJobEditor(slug: string) {
     isEditing: readonly(isEditing),
     isSaving: readonly(isSaving),
     isDirty,
+    validationErrors,
     error: readonly(error),
     start,
     cancel,

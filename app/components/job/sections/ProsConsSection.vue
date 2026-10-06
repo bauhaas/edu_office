@@ -21,7 +21,17 @@ const TABS: readonly SegmentOption<ProConKind>[] = [
 ]
 const CARD_TILTS = [-2.5, 1.5, -1.5, 2] as const
 
-const activeKind = ref<ProConKind>('pro')
+const isEditing = useEditMode()
+const selectedKind = ref<ProConKind>('pro')
+const availableKinds = computed(() => TABS.filter((tab) => props.section.items.some((item) => item.kind === tab.value)))
+/** Tabs only make sense when both sides have content; editors always need both to add items. */
+const showTabs = computed(() => isEditing.value || availableKinds.value.length > 1)
+const activeKind = computed<ProConKind>({
+  get: () => (showTabs.value ? selectedKind.value : (availableKinds.value[0]?.value ?? selectedKind.value)),
+  set: (kind) => {
+    selectedKind.value = kind
+  }
+})
 const visibleItems = computed(() => props.section.items.filter((item) => item.kind === activeKind.value))
 const tiltAt = (index: number): number => CARD_TILTS[index % CARD_TILTS.length] ?? 0
 const patchItem = (item: ProCon, changes: Partial<Omit<ProCon, 'id' | 'kind'>>): void => updateItem({ ...item, ...changes })
@@ -29,14 +39,14 @@ const patchItem = (item: ProCon, changes: Partial<Omit<ProCon, 'id' | 'kind'>>):
 
 <template>
   <div class="space-y-5">
-    <UiSectionTitle>
+    <UiSectionTitle v-if="isEditing || section.title" strong>
       <EditorEditableText :model-value="section.title" label="Titre" @update:model-value="patch({ title: $event })" />
     </UiSectionTitle>
 
-    <UiSegmented v-model="activeKind" :options="TABS" label="Points forts et points faibles" />
+    <UiSegmented v-if="showTabs" v-model="activeKind" :options="TABS" label="Points forts et points faibles" />
 
     <Transition mode="out-in" name="cards">
-      <ul :key="activeKind" class="space-y-4 px-1 pt-2" role="tabpanel">
+      <ul :key="activeKind" class="space-y-4 px-1 pt-2" :role="showTabs ? 'tabpanel' : undefined">
         <li
           v-for="(item, index) in visibleItems"
           :key="item.id"
@@ -51,9 +61,9 @@ const patchItem = (item: ProCon, changes: Partial<Omit<ProCon, 'id' | 'kind'>>):
             @remove="removeItem(item.id)"
           />
           <h3 class="mb-2 text-[17px] leading-snug font-semibold">
-            <EditorEditableText :model-value="item.title" label="Titre" @update:model-value="patchItem(item, { title: $event })" />
+            <EditorEditableText :model-value="item.title" label="Titre" required @update:model-value="patchItem(item, { title: $event })" />
           </h3>
-          <p class="text-[15px] leading-relaxed text-ink-muted">
+          <p v-if="isEditing || item.body" class="text-[15px] leading-relaxed text-ink-muted">
             <EditorEditableText :model-value="item.body" label="Texte" multiline @update:model-value="patchItem(item, { body: $event })" />
           </p>
         </li>

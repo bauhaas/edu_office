@@ -8,6 +8,7 @@ const asset = defineModel<Asset>({ required: true })
 const isEditing = useEditMode()
 const error = ref<string | null>(null)
 const isLoading = ref(false)
+const accept = ACCEPTED_IMAGE_TYPES.join(',')
 
 async function onFileChange(event: Event): Promise<void> {
   const input = event.target as HTMLInputElement
@@ -37,6 +38,9 @@ async function onFileChange(event: Event): Promise<void> {
     >
       <Icon :name="isLoading ? 'lucide:loader-circle' : 'lucide:image-up'" class="size-6" :class="{ 'animate-spin': isLoading }" />
     </span>
-    <input type="file" accept="image/*" class="sr-only" :aria-label="`Changer ${label}`" @change="onFileChange">
+    <input type="file" :accept="accept" class="sr-only" :aria-label="`Changer ${label}`" @change="onFileChange">
+    <span v-if="error" role="alert" class="absolute inset-x-1 bottom-1 rounded bg-red-600 px-1.5 py-1 text-center text-[11px] leading-tight text-white">
+      {{ error }}
+    </span>
   </label>
 </template>

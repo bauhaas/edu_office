@@ -44,6 +44,7 @@ const patch = (changes: Partial<Omit<Subjob, 'id'>>): void => emit('update', { .
       <EditorEditableText
         :model-value="subjob.label"
         label="Nom du métier"
+        required
         @update:model-value="patch({ label: $event })"
       />
     </h3>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const slug = useSlugParam()
 const editor = await useJobEditor(slug)
-const { draft, isEditing, isDirty, isSaving, error } = editor
+const { draft, isEditing, isDirty, isSaving, error, validationErrors } = editor
 
 provideEditMode(isEditing)
 
@@ -27,6 +27,7 @@ useEventListener('beforeunload', (event: BeforeUnloadEvent) => {
           :is-dirty="isDirty"
           :is-saving="isSaving"
           :error="error"
+          :validation-errors="validationErrors"
           :public-path="`/metiers/${slug}`"
           @start="editor.start"
           @cancel="editor.cancel"

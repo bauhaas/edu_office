@@ -15,11 +15,11 @@ const patchStats = (changes: Partial<AboutStats>): void => patch({ stats: { ...p
 
 <template>
   <div class="space-y-5">
-    <UiSectionTitle>
+    <UiSectionTitle v-if="isEditing || section.title">
       <EditorEditableText :model-value="section.title" label="Titre" @update:model-value="patch({ title: $event })" />
     </UiSectionTitle>
 
-    <div class="space-y-3">
+    <div v-if="isEditing || section.body" class="space-y-3">
       <p class="text-[15px] leading-relaxed text-ink" :class="{ 'line-clamp-3': !isExpanded && !isEditing }">
         <EditorEditableText :model-value="section.body" label="Texte" multiline @update:model-value="patch({ body: $event })" />
       </p>
@@ -54,6 +54,8 @@ const patchStats = (changes: Partial<AboutStats>): void => patch({ stats: { ...p
         <EditorEditableNumber
           :model-value="section.stats.openPositions.year"
           label="Année"
+          :min="1900"
+          :max="2100"
           @update:model-value="patchStats({ openPositions: { ...section.stats.openPositions, year: $event } })"
         />
       </JobStatItem>

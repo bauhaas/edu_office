@@ -26,9 +26,9 @@ const { isRevealed } = useReveal(card, 0.3)
     <img src="/images/sticker-bell.png" alt="" class="deco top-20 -right-8 w-16" :class="{ 'is-in': isRevealed }">
 
     <h2 class="mx-auto max-w-[14ch] text-[22px] leading-tight font-semibold text-balance">
-      <EditorEditableText :model-value="section.title" label="Titre" @update:model-value="patch({ title: $event })" />
+      <EditorEditableText :model-value="section.title" label="Titre" required @update:model-value="patch({ title: $event })" />
     </h2>
-    <p class="mt-3 text-[15px] text-ink-muted">
+    <p v-if="isEditing || section.subtitle" class="mt-3 text-[15px] text-ink-muted">
       <EditorEditableText :model-value="section.subtitle" label="Sous-titre" @update:model-value="patch({ subtitle: $event })" />
     </p>
 
@@ -39,12 +39,13 @@ const { isRevealed } = useReveal(card, 0.3)
       rel="noopener noreferrer"
       class="mt-10 block rounded-2xl bg-ink px-6 py-4 text-[17px] font-medium text-white transition-transform active:scale-[0.98]"
     >
-      <EditorEditableText :model-value="section.buttonLabel" label="Libellé du bouton" @update:model-value="patch({ buttonLabel: $event })" />
+      <EditorEditableText :model-value="section.buttonLabel" label="Libellé du bouton" required :maxlength="60" @update:model-value="patch({ buttonLabel: $event })" />
     </component>
     <label v-if="isEditing" class="mt-2 flex items-center gap-2 text-left text-xs text-ink-muted">
       <Icon name="lucide:link" class="size-4 shrink-0" />
       <input
         type="url"
+        maxlength="2048"
         :value="section.href"
         aria-label="Lien du bouton"
         class="editable-field"

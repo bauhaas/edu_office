@@ -22,7 +22,7 @@ const patchItem = (item: FaqItem, changes: Partial<Omit<FaqItem, 'id'>>): void =
 
 <template>
   <div class="space-y-5">
-    <UiSectionTitle>
+    <UiSectionTitle class="font-bold">
       <EditorEditableText :model-value="section.title" label="Titre" @update:model-value="patch({ title: $event })" />
     </UiSectionTitle>
 
@@ -45,7 +45,7 @@ const patchItem = (item: FaqItem, changes: Partial<Omit<FaqItem, 'id'>>): void =
             @click="isEditing || toggle(item.id)"
           >
             <span class="flex-1">
-              <EditorEditableText :model-value="item.question" label="Question" @update:model-value="patchItem(item, { question: $event })" />
+              <EditorEditableText :model-value="item.question" label="Question" required @update:model-value="patchItem(item, { question: $event })" />
             </span>
             <Icon
               v-if="!isEditing"
@@ -58,7 +58,7 @@ const patchItem = (item: FaqItem, changes: Partial<Omit<FaqItem, 'id'>>): void =
         </h3>
         <UiCollapse :id="`faq-${item.id}`" :open="isOpen(item.id)">
           <p class="px-4 pb-4 text-[15px] leading-relaxed text-ink-muted">
-            <EditorEditableText :model-value="item.answer" label="Réponse" multiline @update:model-value="patchItem(item, { answer: $event })" />
+            <EditorEditableText :model-value="item.answer" label="Réponse" multiline required @update:model-value="patchItem(item, { answer: $event })" />
           </p>
         </UiCollapse>
       </li>
