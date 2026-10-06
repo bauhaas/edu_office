@@ -23,11 +23,15 @@ const CARD_TILTS = [-2.5, 1.5, -1.5, 2] as const
 
 const isEditing = useEditMode()
 const selectedKind = ref<ProConKind>('pro')
-const availableKinds = computed(() => TABS.filter((tab) => props.section.items.some((item) => item.kind === tab.value)))
-/** Tabs only make sense when both sides have content; editors always need both to add items. */
-const showTabs = computed(() => isEditing.value || availableKinds.value.length > 1)
+/** Editors always need both tabs to add items; readers only see the sides that have content. */
+const visibleTabs = computed(() =>
+  isEditing.value ? TABS : TABS.filter((tab) => props.section.items.some((item) => item.kind === tab.value))
+)
 const activeKind = computed<ProConKind>({
-  get: () => (showTabs.value ? selectedKind.value : (availableKinds.value[0]?.value ?? selectedKind.value)),
+  get: () =>
+    visibleTabs.value.some((tab) => tab.value === selectedKind.value)
+      ? selectedKind.value
+      : (visibleTabs.value[0]?.value ?? selectedKind.value),
   set: (kind) => {
     selectedKind.value = kind
   }
@@ -41,10 +45,10 @@ const visibleItems = computed(() => props.section.items.filter((item) => item.ki
       <EditorEditableText :model-value="section.title" label="Titre" @update:model-value="patch({ title: $event })" />
     </UiSectionTitle>
 
-    <UiSegmented v-if="showTabs" v-model="activeKind" :options="TABS" label="Points forts et points faibles" />
+    <UiSegmented v-if="visibleTabs.length" v-model="activeKind" :options="visibleTabs" label="Points forts et points faibles" />
 
     <Transition mode="out-in" name="cards">
-      <ul :key="activeKind" class="space-y-4 px-1 pt-2" :role="showTabs ? 'tabpanel' : undefined">
+      <ul :key="activeKind" class="space-y-4 px-1 pt-2" role="tabpanel">
         <li
           v-for="(item, index) in visibleItems"
           :key="item.id"
