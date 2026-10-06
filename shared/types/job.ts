@@ -8,6 +8,8 @@ import type {
   proConKindSchema,
   proConSchema,
   tipSchema,
+  secretSchema,
+  collagePieceSchema,
   jobSectionSchema,
   jobPageSchema
 } from '../schemas/job'
@@ -20,6 +22,8 @@ export type FaqItem = z.infer<typeof faqItemSchema>
 export type ProConKind = z.infer<typeof proConKindSchema>
 export type ProCon = z.infer<typeof proConSchema>
 export type Tip = z.infer<typeof tipSchema>
+export type Secret = z.infer<typeof secretSchema>
+export type CollagePiece = z.infer<typeof collagePieceSchema>
 
 export type JobSection = z.infer<typeof jobSectionSchema>
 export type JobPage = z.infer<typeof jobPageSchema>

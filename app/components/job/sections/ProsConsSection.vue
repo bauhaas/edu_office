@@ -16,8 +16,8 @@ const { updateItem, removeItem, moveItem, addItem } = useListSection(
 )
 
 const TABS: readonly SegmentOption<ProConKind>[] = [
-  { value: 'pro', label: 'Les plus', emoji: '💖' },
-  { value: 'con', label: 'Les moins', emoji: '☠️' }
+  { value: 'pro', label: 'Les plus', icon: 'fluent-emoji:sparkling-heart' },
+  { value: 'con', label: 'Les moins', icon: 'fluent-emoji:skull-and-crossbones' }
 ]
 const CARD_TILTS = [-2.5, 1.5, -1.5, 2] as const
 

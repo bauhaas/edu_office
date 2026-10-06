@@ -2,7 +2,7 @@
 export interface SegmentOption<V extends string> {
   value: V
   label: string
-  emoji?: string
+  icon?: string
 }
 
 defineProps<{ options: readonly SegmentOption<T>[]; label: string }>()
@@ -21,7 +21,7 @@ const model = defineModel<T>({ required: true })
       :class="model === option.value ? 'bg-surface-muted text-ink' : 'text-ink hover:bg-surface-muted/60'"
       @click="model = option.value"
     >
-      <span v-if="option.emoji" aria-hidden="true">{{ option.emoji }}</span>
+      <Icon v-if="option.icon" :name="option.icon" aria-hidden="true" />
       {{ option.label }}
     </button>
   </div>

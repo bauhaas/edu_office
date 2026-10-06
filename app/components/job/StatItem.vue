@@ -1,10 +1,10 @@
 <script setup lang="ts">
-defineProps<{ emoji: string }>()
+defineProps<{ icon: string }>()
 </script>
 
 <template>
   <div class="flex flex-col">
-    <span class="mb-2 text-xl leading-none" aria-hidden="true">{{ emoji }}</span>
+    <Icon :name="icon" class="mb-2 text-xl" aria-hidden="true" />
     <dt class="order-2 text-[15px] leading-snug text-ink-muted">
       <slot />
     </dt>

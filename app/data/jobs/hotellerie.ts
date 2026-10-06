@@ -128,10 +128,64 @@ export const hotellerie = {
       type: 'tips',
       title: 'Prends une longueur d’avance',
       items: [
-        { id: 'culture', emoji: '📌', text: 'Développe ta culture du secteur : nouvelles adresses, destinations, cultures étrangères…' },
-        { id: 'langues', emoji: '🌍', text: 'Travaille tes langues : l’anglais est indispensable, une deuxième langue fait la différence.' },
-        { id: 'job', emoji: '🍽️', text: 'Teste-toi avec un job d’été ou un stage en restaurant, hôtel ou office de tourisme.' },
-        { id: 'reseau', emoji: '🤝', text: 'Parle avec des pros : salons, journées portes ouvertes, réseaux sociaux.' }
+        { id: 'culture', icon: 'fluent-emoji:pushpin', text: 'Développe ta culture du secteur : nouvelles adresses, destinations, cultures étrangères…' },
+        { id: 'langues', icon: 'fluent-emoji:globe-showing-europe-africa', text: 'Travaille tes langues : l’anglais est indispensable, une deuxième langue fait la différence.' },
+        { id: 'job', icon: 'fluent-emoji:fork-and-knife-with-plate', text: 'Teste-toi avec un job d’été ou un stage en restaurant, hôtel ou office de tourisme.' },
+        { id: 'reseau', icon: 'fluent-emoji:handshake', text: 'Parle avec des pros : salons, journées portes ouvertes, réseaux sociaux.' }
+      ]
+    },
+    {
+      id: 'collage',
+      type: 'collage',
+      items: [
+        { id: 'palm-large', asset: { src: '/images/collage-palm.png', alt: '' }, x: 17, y: 51, width: 36, rotate: 0, secret: null },
+        { id: 'palm-small', asset: { src: '/images/collage-palm.png', alt: '' }, x: 31, y: 82, width: 24, rotate: 0, secret: null },
+        { id: 'oui-chef', asset: { src: '/images/sticker-oui-chef.png', alt: '' }, x: 5, y: 20, width: 29, rotate: -15, secret: null },
+        { id: 'michelin', asset: { src: '/images/collage-michelin.png', alt: '' }, x: 43, y: 52, width: 6, rotate: 0, secret: null },
+        { id: 'bell', asset: { src: '/images/sticker-bell.png', alt: '' }, x: 99, y: 18, width: 16, rotate: 0, secret: null },
+        { id: 'key', asset: { src: '/images/sticker-key.png', alt: '' }, x: 97, y: 42, width: 26, rotate: 160, secret: null },
+        { id: 'hand-plate', asset: { src: '/images/collage-hand-plate.png', alt: '' }, x: 63, y: 60, width: 34, rotate: 0, secret: null },
+        { id: 'plane-window', asset: { src: '/images/collage-plane-window.png', alt: '' }, x: 49, y: 95, width: 27, rotate: 0, secret: null },
+        {
+          id: 'tanya',
+          asset: { src: '/images/collage-tanya.png', alt: 'Tanya, personnage de The White Lotus' },
+          x: 86,
+          y: 64,
+          width: 40,
+          rotate: 0,
+          secret: {
+            showHint: true,
+            title: 'Le client roi ?',
+            body: 'Dans The White Lotus, Tanya incarne une cliente aussi attachante qu’imprévisible. Derrière l’humour de la série se cache une réalité : les professionnels de l’hôtellerie doivent savoir répondre aux attentes des clients, même dans les situations les plus délicates.'
+          }
+        },
+        { id: 'grass', asset: { src: '/images/collage-grass.png', alt: '' }, x: 88, y: 92, width: 46, rotate: 0, secret: null },
+        {
+          id: 'ratatouille',
+          asset: { src: '/images/collage-ratatouille.png', alt: 'Rémy, le rat cuisinier de Ratatouille' },
+          x: 68,
+          y: 85,
+          width: 28,
+          rotate: 0,
+          secret: {
+            showHint: false,
+            title: 'Tout le monde peut cuisiner ?',
+            body: 'Dans Ratatouille, Rémy devient chef dans un grand restaurant parisien. La morale colle au secteur : peu importe d’où tu viens, ce sont le talent et l’envie d’apprendre qui te font progresser.'
+          }
+        },
+        {
+          id: 'chef',
+          asset: { src: '/images/collage-chef-glasses.png', alt: 'Une cheffe aux lunettes rondes' },
+          x: 15,
+          y: 86,
+          width: 31,
+          rotate: 0,
+          secret: {
+            showHint: false,
+            title: 'Cheffe étoilée ?',
+            body: 'Beaucoup de grandes tables récompensées par le guide Michelin sont tenues par des chefs qui ont commencé par un CAP ou un apprentissage. En cuisine, c’est le travail, la rigueur et la curiosité qui font la différence.'
+          }
+        }
       ]
     }
   ]

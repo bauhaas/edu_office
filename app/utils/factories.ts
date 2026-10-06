@@ -1,4 +1,6 @@
-import type { FaqItem, ProCon, ProConKind, Subjob, Tip } from '#shared/types/job'
+import type { FaqItem, ProCon, ProConKind, Secret, Subjob, Tip } from '#shared/types/job'
+
+export const createSecret = (): Secret => ({ title: 'Le saviez-vous ?', body: 'Raconte une anecdote…', showHint: false })
 
 export const createFaqItem = (): FaqItem => ({ id: createId(), question: 'Nouvelle question ?', answer: 'Réponse…' })
 
@@ -16,4 +18,4 @@ export const createSubjob = (): Subjob => ({
   stickers: []
 })
 
-export const createTip = (): Tip => ({ id: createId(), emoji: '💡', text: 'Nouveau conseil…' })
+export const createTip = (): Tip => ({ id: createId(), icon: 'fluent-emoji:light-bulb', text: 'Nouveau conseil…' })

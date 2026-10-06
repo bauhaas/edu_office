@@ -24,9 +24,11 @@ npm run build
 
 ### Modèle de données (`shared/schemas/job.ts`)
 - Le **schéma zod est la source de vérité**, les types (`shared/types/job.ts`) en sont inférés : pas de double maintenance.
-- Une page = `{ slug, title, tagline, sections: JobSection[] }`. `JobSection` est une **union discriminée** sur `type` (`subjobs`, `about`, `faq`, `prosCons`, `cta`, `tips`) : l'ordre des sections est l'ordre du tableau.
+- Une page = `{ slug, title, tagline, sections: JobSection[] }`. `JobSection` est une **union discriminée** sur `type` (`subjobs`, `about`, `faq`, `prosCons`, `cta`, `tips`, `collage`) : l'ordre des sections est l'ordre du tableau.
 - Renommages vs brief : `salary → medianStartingSalary`, `open_jobs → openPositions { count, year }` (l'année est affichée), `job_count → professionalsCount`, `formation_count → trainingsCount`, procons `type → kind` (évite la collision avec le discriminant de section).
 - Les stickers des cartes métiers sont des données (`x`, `y`, `width`, `rotate` en %) et non du CSS en dur.
+- Le collage du bas est une section `collage` : une liste de pièces (même forme que les stickers, l'ordre du tableau = l'ordre d'empilement). Chaque pièce a un `secret: { title, body } | null`. Un personnage avec un secret devient cliquable et ouvre un plein écran flouté (pas de routing). Le secret est rattaché à la pièce plutôt que stocké dans une liste à part : pas d'identifiant croisé à maintenir, et supprimer la pièce supprime son secret.
+- La clé de stockage est passée en `v2` avec ce changement de schéma : les anciens brouillons sont ignorés au lieu d'être mal relus.
 
 ### Séparation donnée / affichage
 | Couche | Rôle |
@@ -43,23 +45,26 @@ npm run build
 ### Éditeur
 - Textes, nombres, images (redimensionnées côté client en webp ~60 Ko pour tenir dans localStorage), lien du CTA (validé `http(s)` pour éviter `javascript:`).
 - Ajout / suppression / réordonnancement des métiers, questions, plus/moins, conseils ; réordonnancement des sections.
+- Secrets du collage : en mode édition, toutes les pièces sont cliquables. Une pièce sans secret en reçoit un par défaut, à éditer dans le plein écran, avec un bouton « Supprimer le secret ».
 - Garde-fous : alerte si on quitte avec des modifs non enregistrées, message si le quota localStorage est dépassé.
 
 ### Animations
 - Cartes métiers : photo qui s'incline + stickers qui apparaissent puis flottent à l'entrée dans le viewport.
 - Plus / moins : cartes inclinées qui pivotent à l'échange d'onglet.
 - FAQ : accordéon (transition `grid-template-rows`).
-- Conseils : pile de cartes swipeable (pointer events) + pagination.
+- Conseils : pile de cartes navigable au swipe, avec les flèches, en cliquant sur les points ou au clavier (← →).
+- Secrets : plein écran avec un flou fort (`backdrop-blur-2xl`), image qui apparaît en « pop », fermeture avec la croix, Échap ou un clic sur le fond, et scroll de la page bloqué pendant l'ouverture.
 - Révélation des sections au scroll, stickers du CTA et du footer.
 - `prefers-reduced-motion` respecté.
 
 ## Ce qui manque / limites honnêtes
 - Pas de maquette Figma exploitable directement (pas d'accès MCP) : couleurs, tailles et espacements sont **estimés à partir des captures**, pas des valeurs exactes.
 - Les animations du Drive n'ont pas été consultées : interprétation personnelle.
-- Le collage du footer est reconstruit avec les stickers fournis (palmiers, serveur, etc. non fournis).
+- Les positions du collage sont calées à l'œil sur la capture, pas sur les valeurs Figma.
+- Les secrets de la cheffe et de Ratatouille sont des textes que j'ai rédigés (seul celui de Tanya figure dans la maquette).
 - Barre du haut (boutons ronds visibles en haut de la capture) non reproduite.
 - Données non partagées entre navigateurs ; pas de bouton « réinitialiser » (vider la clé localStorage).
-- Les positions des stickers ne sont pas éditables (ni ajout de stickers) ; les nouveaux métiers n'en ont pas.
+- Les positions des stickers et des pièces du collage ne sont pas éditables (on ne peut pas non plus en ajouter) ; les nouveaux métiers n'ont pas de stickers.
 - Pas de tests automatisés.
 
 ## Avec 2 jours de plus

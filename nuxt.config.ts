@@ -28,6 +28,8 @@ export default defineNuxtConfig({
     typeCheck: false
   },
   icon: {
-    serverBundle: { collections: ['lucide'] }
+    serverBundle: { collections: ['lucide'] },
+    // Default scan skips .ts; default content in app/data/ holds icon names too.
+    clientBundle: { scan: { globInclude: ['app/**/*.{vue,ts}'] } }
   }
 })

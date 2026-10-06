@@ -29,7 +29,7 @@ const patchStats = (changes: Partial<AboutStats>): void => patch({ stats: { ...p
     </div>
 
     <dl class="grid grid-cols-2 gap-x-6 gap-y-5 pt-1">
-      <JobStatItem emoji="💰">
+      <JobStatItem icon="fluent-emoji:money-bag">
         <template #value>
           <EditorEditableNumber
             :model-value="section.stats.medianStartingSalary"
@@ -41,7 +41,7 @@ const patchStats = (changes: Partial<AboutStats>): void => patch({ stats: { ...p
         salaire médian en début de carrière
       </JobStatItem>
 
-      <JobStatItem emoji="🚀">
+      <JobStatItem icon="fluent-emoji:rocket">
         <template #value>
           <EditorEditableNumber
             :model-value="section.stats.openPositions.count"
@@ -58,7 +58,7 @@ const patchStats = (changes: Partial<AboutStats>): void => patch({ stats: { ...p
         />
       </JobStatItem>
 
-      <JobStatItem emoji="🧑‍🍳">
+      <JobStatItem icon="fluent-emoji:cook">
         <template #value>
           <EditorEditableNumber
             :model-value="section.stats.professionalsCount"
@@ -70,7 +70,7 @@ const patchStats = (changes: Partial<AboutStats>): void => patch({ stats: { ...p
         de professionnels en France
       </JobStatItem>
 
-      <JobStatItem emoji="🎓">
+      <JobStatItem icon="fluent-emoji:graduation-cap">
         <template #value>
           <EditorEditableNumber
             :model-value="section.stats.trainingsCount"

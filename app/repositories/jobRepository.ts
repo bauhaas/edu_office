@@ -8,7 +8,8 @@ export interface JobRepository {
   save(page: JobPage): Promise<void>
 }
 
-const STORAGE_PREFIX = 'edumapper:job:v1:'
+// Bump when the schema changes incompatibly; older drafts are then ignored.
+const STORAGE_PREFIX = 'edumapper:job:v4:'
 
 const storageKey = (slug: string): string => `${STORAGE_PREFIX}${slug}`
 

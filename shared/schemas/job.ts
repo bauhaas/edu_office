@@ -7,7 +7,7 @@ export const assetSchema = z.object({
   alt: z.string()
 })
 
-/** Decorative image laid over a card; coordinates are % of the card box. */
+/** Decorative image laid over a box; x/y are the image centre and width, all in % of the box. */
 export const stickerSchema = z.object({
   id,
   asset: assetSchema,
@@ -51,8 +51,20 @@ export const proConSchema = z.object({
 
 export const tipSchema = z.object({
   id,
-  emoji: z.string(),
+  icon: z.string(),
   text: z.string()
+})
+
+/** Hidden story revealed in a full-screen overlay when its collage piece is tapped. */
+export const secretSchema = z.object({
+  title: z.string(),
+  body: z.string(),
+  /** Shows a pulsing badge on the piece; default keeps older saved drafts valid. */
+  showHint: z.boolean().default(false)
+})
+
+export const collagePieceSchema = stickerSchema.extend({
+  secret: secretSchema.nullable()
 })
 
 export const subjobsSectionSchema = z.object({
@@ -99,13 +111,21 @@ export const tipsSectionSchema = z.object({
   items: z.array(tipSchema)
 })
 
+/** Pieces render in array order: later items sit on top. */
+export const collageSectionSchema = z.object({
+  id,
+  type: z.literal('collage'),
+  items: z.array(collagePieceSchema)
+})
+
 export const jobSectionSchema = z.discriminatedUnion('type', [
   subjobsSectionSchema,
   aboutSectionSchema,
   faqSectionSchema,
   prosConsSectionSchema,
   ctaSectionSchema,
-  tipsSectionSchema
+  tipsSectionSchema,
+  collageSectionSchema
 ])
 
 export const jobPageSchema = z.object({
