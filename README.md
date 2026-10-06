@@ -20,7 +20,6 @@ npm run build
 - Limite assumée : les modifs sont **par navigateur** (pas partagées entre l'équipe).
 - Tout l'accès à la donnée passe par `JobRepository` (interface async `find`/`save`). Passer à Supabase / une API Nitro = une nouvelle implémentation, aucun composant à toucher.
 - Les données relues sont **validées par zod** : un contenu corrompu est ignoré (fallback sur le défaut), il ne casse pas la page.
-- `ssr: false` sur `/metiers/**` (routeRules) : localStorage n'existe pas côté serveur, ça évite un flash contenu par défaut → contenu édité. Compatible Vercel (preset auto).
 
 ### Modèle de données (`shared/schemas/job.ts`)
 - Le **schéma zod est la source de vérité**, les types (`shared/types/job.ts`) en sont inférés : pas de double maintenance.
@@ -56,16 +55,6 @@ npm run build
 - Secrets : plein écran avec un flou fort (`backdrop-blur-2xl`), image qui apparaît en « pop », fermeture avec la croix, Échap ou un clic sur le fond, et scroll de la page bloqué pendant l'ouverture.
 - Révélation des sections au scroll, stickers du CTA et du footer.
 - `prefers-reduced-motion` respecté.
-
-## Ce qui manque / limites honnêtes
-- Pas de maquette Figma exploitable directement (pas d'accès MCP) : couleurs, tailles et espacements sont **estimés à partir des captures**, pas des valeurs exactes.
-- Les animations du Drive n'ont pas été consultées : interprétation personnelle.
-- Les positions du collage sont calées à l'œil sur la capture, pas sur les valeurs Figma.
-- Les secrets de la cheffe et de Ratatouille sont des textes que j'ai rédigés (seul celui de Tanya figure dans la maquette).
-- Barre du haut (boutons ronds visibles en haut de la capture) non reproduite.
-- Données non partagées entre navigateurs ; pas de bouton « réinitialiser » (vider la clé localStorage).
-- Les positions des stickers et des pièces du collage ne sont pas éditables (on ne peut pas non plus en ajouter) ; les nouveaux métiers n'ont pas de stickers.
-- Pas de tests automatisés.
 
 ## Avec 2 jours de plus
 1. Persistance partagée : Supabase (ou Nitro storage + Vercel KV) derrière `JobRepository`, images sur Vercel Blob, SSR réactivé.

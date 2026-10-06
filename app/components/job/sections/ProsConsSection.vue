@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProCon, ProConKind, SectionOf } from '#shared/types/job'
+import type { ProConKind, SectionOf } from '#shared/types/job'
 import type { SegmentOption } from '~/components/ui/UiSegmented.vue'
 
 type Section = SectionOf<'prosCons'>
@@ -9,7 +9,7 @@ const emit = defineEmits<{ update: [section: Section] }>()
 
 const update = (next: Section): void => emit('update', next)
 const patch = useSectionPatch(() => props.section, update)
-const { updateItem, removeItem, moveItem, addItem } = useListSection(
+const { patchItem, removeItem, moveItem, addItem } = useListSection(
   () => props.section,
   update,
   (a, b) => a.kind === b.kind
@@ -33,8 +33,6 @@ const activeKind = computed<ProConKind>({
   }
 })
 const visibleItems = computed(() => props.section.items.filter((item) => item.kind === activeKind.value))
-const tiltAt = (index: number): number => CARD_TILTS[index % CARD_TILTS.length] ?? 0
-const patchItem = (item: ProCon, changes: Partial<Omit<ProCon, 'id' | 'kind'>>): void => updateItem({ ...item, ...changes })
 </script>
 
 <template>
@@ -51,7 +49,7 @@ const patchItem = (item: ProCon, changes: Partial<Omit<ProCon, 'id' | 'kind'>>):
           v-for="(item, index) in visibleItems"
           :key="item.id"
           class="card relative rounded-[1.25rem] bg-surface px-5 py-5 shadow-card ring-1 ring-black/5"
-          :style="{ '--tilt': `${tiltAt(index)}deg`, '--delay': `${index * 90}ms` }"
+          :style="{ '--tilt': `${cycleAt(CARD_TILTS, index)}deg`, '--delay': `${index * 90}ms` }"
         >
           <EditorItemControls
             :label="item.title"

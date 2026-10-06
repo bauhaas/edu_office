@@ -34,6 +34,11 @@ export function moveById<T extends Identifiable>(
   return next
 }
 
+/** Loops over a non-empty constant list, e.g. alternating card tilts. */
+export function cycleAt<T>(values: readonly [T, ...T[]], index: number): T {
+  return values[index % values.length]!
+}
+
 export function createId(): string {
   return crypto.randomUUID()
 }

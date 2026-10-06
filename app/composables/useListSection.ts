@@ -14,6 +14,8 @@ export function useListSection<S extends ListSection>(
 
   return {
     updateItem: (item: ItemOf<S>) => commit(replaceById(items(), item)),
+    patchItem: (item: ItemOf<S>, changes: Partial<Omit<ItemOf<S>, 'id'>>) =>
+      commit(replaceById(items(), { ...item, ...changes } as ItemOf<S>)),
     removeItem: (id: string) => commit(removeById(items(), id)),
     moveItem: (id: string, direction: MoveDirection) => commit(moveById(items(), id, direction, sameGroup)),
     addItem: (item: ItemOf<S>) => commit([...items(), item])

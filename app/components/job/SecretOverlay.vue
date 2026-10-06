@@ -28,7 +28,7 @@ onBeforeUnmount(() => {
     :aria-label="secret.title || 'Secret'"
     @click.self="$emit('close')"
   >
-    <div class="relative flex w-full max-w-[430px] flex-col items-center overflow-y-auto px-7 pt-28 pb-12 text-center text-white" @click.self="$emit('close')">
+    <div class="relative flex w-full max-w-page flex-col items-center overflow-y-auto px-7 pt-28 pb-12 text-center text-white" @click.self="$emit('close')">
       <button
         ref="closeButton"
         type="button"

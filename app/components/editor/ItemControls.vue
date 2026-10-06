@@ -1,5 +1,5 @@
 <script setup lang="ts">
-defineProps<{ label: string; canMoveUp: boolean; canMoveDown: boolean; removable?: boolean }>()
+withDefaults(defineProps<{ label: string; canMoveUp: boolean; canMoveDown: boolean; removable?: boolean }>(), { removable: true })
 defineEmits<{ move: [direction: MoveDirection]; remove: [] }>()
 const isEditing = useEditMode()
 </script>
@@ -17,7 +17,7 @@ const isEditing = useEditMode()
     <button type="button" class="control-btn" :disabled="!canMoveDown" aria-label="Descendre" @click="$emit('move', 1)">
       <Icon name="lucide:arrow-down" />
     </button>
-    <button v-if="removable !== false" type="button" class="control-btn hover:bg-red-500" aria-label="Supprimer" @click="$emit('remove')">
+    <button v-if="removable" type="button" class="control-btn hover:bg-red-500" aria-label="Supprimer" @click="$emit('remove')">
       <Icon name="lucide:trash-2" />
     </button>
   </div>

@@ -2,7 +2,7 @@ import type { JobPage } from '#shared/types/job'
 
 async function loadOrThrow(slug: string): Promise<JobPage> {
   const page = await useJobRepository().find(slug)
-  if (!page) throw createError({ statusCode: 404, message: 'Métier introuvable', fatal: true })
+  if (!page) throw jobNotFoundError()
   return page
 }
 

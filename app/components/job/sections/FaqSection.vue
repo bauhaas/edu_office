@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { FaqItem, SectionOf } from '#shared/types/job'
+import type { SectionOf } from '#shared/types/job'
 
 type Section = SectionOf<'faq'>
 
@@ -8,7 +8,7 @@ const emit = defineEmits<{ update: [section: Section] }>()
 
 const update = (next: Section): void => emit('update', next)
 const patch = useSectionPatch(() => props.section, update)
-const { updateItem, removeItem, moveItem, addItem } = useListSection(() => props.section, update)
+const { patchItem, removeItem, moveItem, addItem } = useListSection(() => props.section, update)
 
 const isEditing = useEditMode()
 const openId = ref<string | null>(null)
@@ -17,7 +17,6 @@ const isOpen = (id: string): boolean => isEditing.value || openId.value === id
 const toggle = (id: string): void => {
   openId.value = openId.value === id ? null : id
 }
-const patchItem = (item: FaqItem, changes: Partial<Omit<FaqItem, 'id'>>): void => updateItem({ ...item, ...changes })
 </script>
 
 <template>

@@ -9,7 +9,6 @@ const emit = defineEmits<{ update: [section: Section] }>()
 const { updateItem, removeItem, moveItem, addItem } = useListSection(() => props.section, (next) => emit('update', next))
 
 const TILTS = [-4, 4, -3, 3] as const
-const tiltAt = (index: number): number => TILTS[index % TILTS.length] ?? 0
 
 const grid = useTemplateRef('grid')
 const { isRevealed } = useReveal(grid)
@@ -28,7 +27,7 @@ const { isRevealed } = useReveal(grid)
         />
         <JobSubjobCard
           :subjob="subjob"
-          :tilt="tiltAt(index)"
+          :tilt="cycleAt(TILTS, index)"
           :revealed="isRevealed"
           :style="{ transitionDelay: `${index * 80}ms` }"
           @update="updateItem"

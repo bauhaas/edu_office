@@ -6,7 +6,8 @@ export async function useJobEditor(slug: string) {
   const repository = useJobRepository()
   const { page, refresh } = await useJobPage(slug)
 
-  const draft = ref<JobPage>(structuredClone(toRaw(page.value)))
+  const snapshot = (): JobPage => structuredClone(toRaw(page.value))
+  const draft = ref<JobPage>(snapshot())
   const isEditing = ref(false)
   const isSaving = ref(false)
   const error = ref<string | null>(null)
@@ -23,7 +24,7 @@ export async function useJobEditor(slug: string) {
   }
 
   function cancel(): void {
-    draft.value = structuredClone(toRaw(page.value))
+    draft.value = snapshot()
     error.value = null
     isEditing.value = false
   }
@@ -36,7 +37,7 @@ export async function useJobEditor(slug: string) {
       await repository.save(toRaw(draft.value))
       await refresh()
       // The schema trims text, so resync or the draft would stay "dirty".
-      draft.value = structuredClone(toRaw(page.value))
+      draft.value = snapshot()
       isEditing.value = false
     } catch (cause) {
       error.value = cause instanceof Error ? cause.message : 'Échec de l’enregistrement.'

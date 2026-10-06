@@ -3,5 +3,5 @@ const { page } = await useJobPage(useSlugParam())
 </script>
 
 <template>
-  <JobPage :page="page" />
+  <JobPage :page="page" intro />
 </template>
