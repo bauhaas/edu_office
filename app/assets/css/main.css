@@ -1,1 +1,77 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --color-ink: #1c1b1f;
+  --color-ink-muted: #4a4a52;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1f1f1;
+  --color-surface-warm: #f5f0ec;
+  --color-line: #ededed;
+  --color-backdrop: #1a1a1a;
+
+  --radius-card: 1.75rem;
+  --radius-tile: 1rem;
+
+  --shadow-card: 0 6px 24px -8px rgb(0 0 0 / 0.18);
+  --shadow-photo: 0 4px 14px -4px rgb(0 0 0 / 0.35);
+
+  --animate-float: float 4s ease-in-out infinite;
+  --animate-reveal: reveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(var(--sticker-rotate, 0deg)); }
+    50% { transform: translateY(-4px) rotate(calc(var(--sticker-rotate, 0deg) + 3deg)); }
+  }
+
+  @keyframes reveal {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-backdrop font-sans text-ink antialiased;
+  }
+}
+
+/* Top and bottom halves share the #f3d3e6 seam so stacked blocks blend into one gradient. */
+@utility bg-gradient-page-top {
+  background:
+    radial-gradient(90% 70% at 0% 30%, rgb(251 205 185 / 0.9) 0%, transparent 70%),
+    linear-gradient(180deg, #f5f0ec 0%, #f3d3e6 100%);
+}
+
+@utility bg-gradient-page-bottom {
+  background:
+    radial-gradient(80% 60% at 100% 10%, rgb(244 184 222 / 0.7) 0%, transparent 70%),
+    linear-gradient(180deg, #f3d3e6 0%, #d9d4f5 100%);
+}
+
+@layer components {
+  .editable-field {
+    @apply block w-full resize-none rounded-md bg-sky-50 px-1.5 py-0.5 text-inherit outline-2 outline-dashed outline-sky-400 focus:outline-solid focus:outline-sky-600;
+    font: inherit;
+    letter-spacing: inherit;
+    text-align: inherit;
+    field-sizing: content;
+  }
+
+  .control-btn {
+    @apply grid size-7 place-items-center rounded-full text-sm transition-colors hover:bg-white/20 disabled:opacity-30 disabled:hover:bg-transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
